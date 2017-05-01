@@ -11,15 +11,22 @@ class CharacterIcon extends Component {
     this.pickCharacter = this.pickCharacter.bind(this);
   }
   pickCharacter(event) {
-    alert(this.props.charName)
     this.props.pickCharacter(this.props.charName)
     event.preventDefault();
   }
   render() {
     const imgName = this.props.icon;
-      return (
-        <li onClick={this.pickCharacter}><img src={imgName} /></li>
-      );
+    let icon = null;
+
+    var className = "";
+    if(this.props.picked) {
+      className = "picked-icon"
+    }
+    if(this.props.pickCharacter != null && !this.props.picked) {
+      return (<li className={className} onClick={this.pickCharacter}><img src={imgName} /></li>);
+    } else {
+      return (icon = <li className={className} ><img src={imgName} /></li>);
+    }
   }
 
 }
@@ -29,9 +36,21 @@ class PlayerPool extends Component {
 
   }
   render() {
+    let characterList = [];
+    if(this.props.characterList != null) {
+      for(var i = 0; i < this.props.characterList.length ; i++) {
+          var imgName = "/img/"+this.props.characterList[i]+".png"
+          characterList.push(<CharacterIcon key={this.props.characterList[i]} icon={imgName} charName={this.props.characterList[i]}/>)
+      }
+    }
     const playerName = this.props.playerName
       return (
-        <div><h3>{playerName}</h3></div>
+        <div className="panel panel-default">
+          <div className="panel-body">
+        <h3>{playerName}</h3>
+        <ul>{characterList}</ul>
+        </div>
+      </div>
       );
   }
 
@@ -39,18 +58,26 @@ class PlayerPool extends Component {
 
 class CharacterList extends Component {
   constructor(props) {
-    super(props);    
+    super(props);
   }
-
 
   render() {
     const characters = [];
     for(var i = 0; i < charNames.length ; i++) {
-        var imgName = "/img/"+charNames[i]+".png"
-        characters.push(<CharacterIcon icon={imgName} charName={charNames[i]} pickCharacter={this.props.pickCharacter}/>)
+      var picked = false;
+      if(this.props.currentlyPicked.indexOf(charNames[i]) >= 0) {
+          picked = true;
+          console.log("IS PICKED " + charNames[i])
+      }
+      var imgName = "/img/"+charNames[i]+".png"
+      characters.push(<CharacterIcon key={charNames[i]} icon={imgName} charName={charNames[i]} picked={picked} pickCharacter={this.props.pickCharacter}/>)
     }
     return (
-      <ul>{characters}</ul>
+      <div className="panel panel-default">
+        <div className="panel-body">
+          <ul className="ban-list">{characters}</ul>
+        </div>
+      </div>
     );
   }
 
@@ -103,9 +130,9 @@ class Calculator extends Component {
     var numOfPlayers = this.props.numOfPlayers;
     var playerArray = [];
     for(var i = 0; i < numOfPlayers; i++) {
-        playerArray.push({isPlayerNameLocked:false});
+        playerArray.push({isPlayerNameLocked:false, characterList:[]});
     }
-    this.state = {players: playerArray, numOfLockedPlayers: 0, inDraftPhase: false, currentPlayer:0};
+    this.state = {players: playerArray, numOfLockedPlayers: 0, inDraftPhase: false, currentPlayer:0, finishedPicking:false};
   }
 
 
@@ -127,15 +154,34 @@ class Calculator extends Component {
   }
 
   pickCharacter(characterName) {
+    var playerArray = this.state.players.slice()
+    var playerCharacterList = playerArray[this.state.currentPlayer].characterList
+    if(playerArray[this.state.currentPlayer].characterList == null) {
+      playerCharacterList = []
+    }
+    playerCharacterList.push(characterName)
+    playerArray[this.state.currentPlayer].characterList = playerCharacterList
+    var finishedPicking = false;
+    if(this.state.currentPlayer === (this.props.numOfPlayers - 1) && playerCharacterList.length === this.props.maxNumOfPicks) {
+        finishedPicking = true
+    }
     var newPlayer = (this.state.currentPlayer + 1) % this.props.numOfPlayers
-    this.setState({currentPlayer: newPlayer})
+    this.setState({players:playerArray, currentPlayer: newPlayer, finishedPicking:finishedPicking})
   }
 
   render() {
-    var numOfPlayers = this.props.numOfPlayers;
-    const currentPlayerName = this.state.players[this.state.currentPlayer].name
+    const numOfPlayers = this.props.numOfPlayers;
+    const currentPlayerName = this.state.players[this.state.currentPlayer].name;
     var playerArray = [];
-    var inDraftPhase = this.state.inDraftPhase
+    const inDraftPhase = this.state.inDraftPhase;
+    const finishedPicking = this.state.finishedPicking;
+    let header = null
+    if(finishedPicking) {
+      header = <h3>Banning Phase Complete</h3>;
+    } else {
+      header = <h3>Ban a character for {currentPlayerName}</h3>;
+    }
+
     var playerPools = [];
     if(inDraftPhase) {
       for(var i = 0; i < numOfPlayers; i++) {
@@ -143,6 +189,7 @@ class Calculator extends Component {
           <PlayerPool
             key={i.toString()}
             playerName={this.state.players[i].name}
+            characterList={this.state.players[i].characterList}
           />
         )
       }
@@ -162,11 +209,12 @@ class Calculator extends Component {
         {playerArray}
         { inDraftPhase &&
           <div>
-          <h3>Ban a character for {currentPlayerName}</h3>
+          {header}
           {playerPools}
-          <CharacterList pickCharacter={this.pickCharacter}/>
+          { !finishedPicking &&
+          <CharacterList pickCharacter={this.pickCharacter} currentlyPicked={this.state.players[this.state.currentPlayer].characterList} />
+          }
           </div>
-
         }
       </div>
     );
