@@ -1,124 +1,8 @@
 import React, { Component } from 'react';
+import PlayerNameInput from './PlayerNameInput'
+import CharacterList from './CharacterList'
+import PlayerPool from './PlayerPool'
 import './App.css';
-
-const charNames = ["axl","bedman","chipp","elphelt","faust","i-no","jack-o","jam","johnny",
-"kum","ky","leo-whitefang","may","millia","potemkin","ramlethal","raven","sin","slayer","sol-badguy",
-"venom","zato-1"];
-
-class CharacterIcon extends Component {
-  constructor(props) {
-    super(props);
-    this.pickCharacter = this.pickCharacter.bind(this);
-  }
-  pickCharacter(event) {
-    this.props.pickCharacter(this.props.charName)
-    event.preventDefault();
-  }
-  render() {
-    const imgName = this.props.icon;
-    let icon = null;
-
-    var className = "";
-    if(this.props.picked) {
-      className = "picked-icon"
-    }
-    if(this.props.pickCharacter != null && !this.props.picked) {
-      return (<li className={className} onClick={this.pickCharacter}><img src={imgName} /></li>);
-    } else {
-      return (icon = <li className={className} ><img src={imgName} /></li>);
-    }
-  }
-
-}
-class PlayerPool extends Component {
-  constructor(props) {
-    super(props);
-
-  }
-  render() {
-    let characterList = [];
-    if(this.props.characterList != null) {
-      for(var i = 0; i < this.props.characterList.length ; i++) {
-          var imgName = "/img/"+this.props.characterList[i]+".png"
-          characterList.push(<CharacterIcon key={this.props.characterList[i]} icon={imgName} charName={this.props.characterList[i]}/>)
-      }
-    }
-    const playerName = this.props.playerName
-      return (
-        <div className="panel panel-default">
-          <div className="panel-body">
-        <h3>{playerName}</h3>
-        <ul>{characterList}</ul>
-        </div>
-      </div>
-      );
-  }
-
-}
-
-class CharacterList extends Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    const characters = [];
-    for(var i = 0; i < charNames.length ; i++) {
-      var picked = false;
-      if(this.props.currentlyPicked.indexOf(charNames[i]) >= 0) {
-          picked = true;
-          console.log("IS PICKED " + charNames[i])
-      }
-      var imgName = "/img/"+charNames[i]+".png"
-      characters.push(<CharacterIcon key={charNames[i]} icon={imgName} charName={charNames[i]} picked={picked} pickCharacter={this.props.pickCharacter}/>)
-    }
-    return (
-      <div className="panel panel-default">
-        <div className="panel-body">
-          <ul className="ban-list">{characters}</ul>
-        </div>
-      </div>
-    );
-  }
-
-}
-
-class PlayerNameInput extends Component {
-  constructor(props) {
-    super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  handleChange(e) {
-    this.props.onPlayerNameChange(e.target.value, this.props.playerNumber);
-  }
-
-  handleSubmit(event) {
-    this.props.onPlayerNameLock(this.props.playerNumber);
-    event.preventDefault();
-  }
-  render() {
-    const playerName = this.props.playerName;
-    const playerNumber = this.props.playerNumber;
-    const playerNameLocked = this.props.playerNameLocked
-    let input = null;
-    if (playerNameLocked) {
-      input = <input value={playerName} onChange={this.handleChange} disabled />
-    } else {
-      input = <input value={playerName} onChange={this.handleChange} />
-    }
-    return (
-        <fieldset>
-          <legend>Enter player {playerNumber+1} name:</legend>
-          {input}
-          { !playerNameLocked &&
-            <button onClick={this.handleSubmit} value="Submit" >Save Name </button>
-          }
-        </fieldset>
-    );
-  }
-}
 
 class Calculator extends Component {
   constructor(props) {
@@ -194,13 +78,13 @@ class Calculator extends Component {
         )
       }
     } else {
-      for(var i = 0; i < numOfPlayers; i++) {
+      for(var j = 0; j < numOfPlayers; j++) {
           playerArray.push(<PlayerNameInput
-            key={i.toString()}
+            key={j.toString()}
             playerNumber={i}
             onPlayerNameChange={this.handlePlayerNameChange}
             onPlayerNameLock={this.lockPlayerName}
-            playerNameLocked={this.state.players[i].isPlayerNameLocked}
+            playerNameLocked={this.state.players[j].isPlayerNameLocked}
           />);
       }
     }
