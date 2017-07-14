@@ -17,8 +17,7 @@ class PlayerNameInput extends Component {
     event.preventDefault();
   }
   render() {
-    const playerName = this.props.playerName;
-    const playerNumber = this.props.playerNumber;
+    const playerName = this.props.playerName;    
     const playerNameLocked = this.props.playerNameLocked
     let input = null;
     if (playerNameLocked) {
@@ -28,7 +27,7 @@ class PlayerNameInput extends Component {
     }
     return (
         <fieldset>
-          <legend>Enter player {playerNumber+1} name:</legend>
+          <legend>Enter your name:</legend>
           {input}
           { !playerNameLocked &&
             <button onClick={this.handleSubmit} value="Submit" >Save Name </button>

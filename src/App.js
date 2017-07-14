@@ -2,9 +2,32 @@ import React, { Component } from 'react';
 import PlayerNameInput from './PlayerNameInput'
 import CharacterList from './CharacterList'
 import PlayerPool from './PlayerPool'
-import './App.css';
+
+var socket = io.connect();
 
 class Calculator extends Component {
+  componentDidMount() {
+		console.log("Component mounted")
+    socket.on('init', this._initialize);
+    socket.on('user:join', this._userJoined);
+		socket.on('user:left', this._userLeft);
+	}
+
+  _initialize(data) {
+		console.log("Initializing");
+    console.log(data)
+	}
+
+  _userJoined(data) {
+      console.log("Player has joined")
+  		console.log(data)
+  	}
+
+  	_userLeft(data) {
+      console.log("Player has Left")
+  		console.log(data)
+  	}
+
   constructor(props) {
     super(props);
     this.handlePlayerNameChange = this.handlePlayerNameChange.bind(this);
@@ -78,15 +101,13 @@ class Calculator extends Component {
         )
       }
     } else {
-      for(var j = 0; j < numOfPlayers; j++) {
-          playerArray.push(<PlayerNameInput
-            key={j.toString()}
-            playerNumber={i}
+          playerArray.push(<PlayerNameInput      
+            playerNumber={j}
             onPlayerNameChange={this.handlePlayerNameChange}
             onPlayerNameLock={this.lockPlayerName}
             playerNameLocked={this.state.players[j].isPlayerNameLocked}
           />);
-      }
+
     }
     return (
       <div>
